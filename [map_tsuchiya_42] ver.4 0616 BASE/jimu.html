@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ja">
+<!-- 最初の設定は終わっています　必要な方は触ってください -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Tutty's Accademy</title>
+    <link rel="icon" type="img/ping" href="img/favicon.png">
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/mapstyle.css">
+</head>
+<!-- 最初の設定は終わっています　必要な方は触ってください -->
+
+<body>
+    <!-- この中に記述していく -->
+    <!-- ここから下にコードを書く -->
+    <header>
+        <div class="head">
+            <h1>
+                <a href="index.html"><img class="logo" src="img/header_logo.png" alt="ロゴ写真"></a>
+            </h1>
+            <nav>
+                <ul class="main-nav">
+                    <li><a href="about.html">ABOUT</a></li>
+                    <li><a href="problem.html">PROBLEM</a></li>
+                    <li><a href="news.html">SOLUTION</a></li>
+                    <li><a href="access.html">ACCESS</a></li>
+                    <li><a href="contact.html">CONTACT</a></li>
+                    <li><a href="yourtype.html">適性診断</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="mainbg">
+        <img src="img/mainbg.jpg" alt="メイン写真">
+        <h1>～誰でもわかる運送業界～</h1>
+        <p>情報を共有する「MAP」になろう!!</p>
+    </div>
+
+    <!-- /#header -->
+
+    <!-- コンテンツ部分 -->
+    <main>
+        <!-- コンタクト部分 -->
+        <div class="contact ">
+            <p>オーダー確認</p>
+        </div>
+        <div class="setumeikai ">
+            <h3>指示の確認</h3>
+            <h4>指示の情報を確認します。
+                <br> 日々の仕事の管理をしてください。
+                <br></h4>
+        </div>
+
+        <!-- フォーム部分 -->
+        <div class="form-container">
+            <h2>配車指示フォーム</h2>
+            <form id="myForm">
+                <div class="form-group">
+                <label for="date">【　日付　】</label>
+                <!-- <input type="date" id="dateValue" name="date" required> -->
+                <p><span id="dateValue"></span></p>
+                </div>
+                <div class="form-group">
+                <label for="driver">【運転手名／車番】</label>
+                <!-- <input type="text" id="driver" name="driver_name" required> -->
+                <p><span id="driverValue"></span></p>
+                </div>     
+                <div class="form-group">
+                <label for="name">【　依頼主様名　】</label>
+                <!-- <input type="text" id="name" name="name" required> -->
+                <p><span id="nameValue"></span></p>
+                </div>
+                <div class="form-group">
+                <label for="cost">【　金　額　】</label>
+                <!-- <input type="text" id="item" name="item" required> -->
+                <p><span id="costValue"></span></p>
+                </div>
+                <div class="form-group">
+                <label for="note">【　備考　】</label>
+                <!-- <textarea id="note" name="note"></textarea> -->
+                <p><span id="noteValue"></span></p>
+                </div>
+                <div class="form-actions">
+                    <input id="calculateButton" type="button" value="確認">
+                </div>
+                
+            </form>
+        
+        <!-- <div id="output" ></div>
+        <form id="searchForm">
+            <input type="text" id="searchInput" placeholder="検索キーワード">
+            <button type="submit">検索</button>
+        </form> -->
+        </div>
+
+
+    </div>
+
+        <!-- MapArea コンテナにして経路と案内を横並びにする-->
+        <div class="container">
+        <div id="myMap"></div>
+        <div id="directionsItinerary"></div>
+        <!-- /MapArea -->
+
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <!-- ファイヤーベースを使ってデータを保存する -->
+        <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.13.0/firebase-app.js";
+        import {getDatabase,ref,push,set,onChildAdded,remove,onChildRemoved,} 
+        from "https://www.gstatic.com/firebasejs/9.13.0/firebase-database.js";
+        
+        const firebaseConfig = {
+
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const dbRef = ref(db, "chat");
+        
+        document.getElementById("calculateButton").addEventListener("click", function () {
+            const date = document.getElementById("date").value;
+            const name = document.getElementById("name").value;
+            const note = document.getElementById("note").value;  
+            const driver = document.getElementById("driver").value;
+            const cost = document.getElementById("cost").value;
+        
+            const msg = {
+            date: date,
+            name: name,
+            note: note,
+            driver: driver,
+            cost: cost,
+        };
+        
+            const newPostRef = push(dbRef);
+            set(newPostRef, msg);
+        
+            alert("登録");
+            clearData();
+        });
+        
+        onChildAdded(dbRef, function (data) {
+            const msg = data.val();
+            // 各フォーム欄に追記される
+            const dateValue = document.getElementById("dateValue");
+            const nameValue = document.getElementById("nameValue");
+            const noteValue = document.getElementById("noteValue");
+            const driverValue = document.getElementById("driverValue");
+            const costValue = document.getElementById("costValue");
+
+
+            // データを表示する
+            dateValue.textContent = msg.date;
+            nameValue.textContent = msg.name;
+            noteValue.textContent = msg.note;
+            driverValue.textContent = msg.driver;
+            costValue.textContent = msg.cost;
+        
+        
+            document.querySelectorAll(".message").forEach(function (message) {
+            message.addEventListener("dblclick", function () {
+            const messageId = message.dataset.messageId;
+            markAsCompleted(messageId);
+            });
+        });
+        });
+            // 一時消去　deleボタンで画面から消去。
+
+            document.getElementById("dele").addEventListener("click", function () {
+            {
+            document.getElementById("output").innerHTML = "";
+            document.getElementById("output").style.display = "none";
+            }
+        });
+
+        // 検索フォームの送信イベントを処理
+            document.getElementById("searchForm").addEventListener("submit", function (e) {
+            e.preventDefault(); // フォームのデフォルトの送信動作をキャンセル
+
+            const searchKeyword = document.getElementById("searchInput").value;
+
+         // Firestoreでの検索クエリの実行
+            const query = ref(db, "chat");
+            const chatRef = query.orderByChild("data").equalTo(searchKeyword)
+            get(child(chatRef)).then((snapshot) => {
+         // 検索結果を処理するコード
+            if (snapshot.exists()) {
+            console.log(snapshot.val());
+            } else {
+            console.log("該当するデータはありません。");
+            }
+            }).catch((error) => {
+            console.error("検索エラー:", error);
+            });
+            });
+
+
+            // 全消去 データベースからも削除
+        document.getElementById("clear").addEventListener("click", function () {
+        if (confirm("本当に削除しますか？")) {
+            remove(dbRef);
+            document.getElementById("output").style.display = "none";
+            location.reload();
+        }
+        });
+        
+        document.getElementById("remove").addEventListener("click", function () {
+        clearData();
+        });
+        
+        function clearData() {
+        document.getElementById("date").value = "";
+        document.getElementById("name").value = "";
+        document.getElementById("code").value = "";
+        document.getElementById("start").value = "";
+        document.getElementById("destination").value = "";
+        document.getElementById("item").value = "";
+        document.getElementById("note").value = "";
+        }
+                
+        </script>
+
+
+        
+        
+    </head>
+
+
+
+    </main>
+
+    <footer id="footer ">
+        <div class="footer ">
+            <p>copyrights since from 1976 Tutty's Academy SAITAMA All RIghts Reserved.</p>
+        </div>
+    </footer>
+
+
+
+
+
+</body>
+
+</html>

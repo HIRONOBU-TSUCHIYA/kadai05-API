@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ja">
+<!-- 最初の設定は終わっています　必要な方は触ってください -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Tutty's Accademy</title>
+    <link rel="icon" type="img/ping" href="img/favicon.png">
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/mapstyle.css">
+</head>
+<!-- 最初の設定は終わっています　必要な方は触ってください -->
+
+<body>
+    <!-- この中に記述していく -->
+    <!-- ここから下にコードを書く -->
+    <header>
+        <div class="head">
+            <h1>
+                <a href="index.html"><img class="logo" src="img/header_logo.png" alt="ロゴ写真"></a>
+            </h1>
+            <nav>
+                <ul class="main-nav">
+                    <li><a href="about.html">ABOUT</a></li>
+                    <li><a href="problem.html">PROBLEM</a></li>
+                    <li><a href="news.html">SOLUTION</a></li>
+                    <li><a href="access.html">ACCESS</a></li>
+                    <li><a href="contact.html">CONTACT</a></li>
+                    <li><a href="yourtype.html">適性診断</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="mainbg">
+        <img src="img/mainbg.jpg" alt="メイン写真">
+        <h1>～誰でもわかる運送業界～</h1>
+        <p>運転手を救う「MAP」になろう!!</p>
+    </div>
+
+    <!-- /#header -->
+
+    <!-- コンテンツ部分 -->
+    <main>
+        <!-- コンタクト部分 -->
+        <div class="contact ">
+            <p>Route_MAP for driver</p>
+        </div>
+        <div class="setumeikai ">
+            <h3>運行ルートの確認</h3>
+            <h4>指示の仕事のルート作成します。
+                <br> 安全運転を心がけて運転してください。
+                <br></h4>
+        </div>
+
+        <!-- フォーム部分 -->
+        <div class="form-container">
+            <h2>配車指示フォーム</h2>
+            <form id="myForm">
+                <div class="form-group">
+                <label for="date">【　日付　】</label>
+                <!-- <input type="date" id="dateValue" name="date" required> -->
+                <p><span id="dateValue"></span></p>
+                </div>
+                <div class="form-group">
+                <label for="driver">【運転手名／車番】</label>
+                <!-- <input type="text" id="driver" name="driver_name" required> -->
+                <p><span id="driverValue"></span></p>
+                </div>     
+                <div class="form-group">
+                <label for="name">【　依頼主様名　】</label>
+                <!-- <input type="text" id="name" name="name" required> -->
+                <p><span id="nameValue"></span></p>
+                </div>
+                <div class="form-group">
+                <label for="code">【　担当者　】</label>
+                <!-- <input type="text" id="code" name="code" required> -->
+                <p><span id="codeValue"></span></p>
+                </div>
+                <div class="form-group">
+                <label for="code2">【　連絡先　】</label>
+                <!-- <input type="text" id="code" name="code" required> -->
+                <p><span id="code2Value"></span></p>
+                </div>
+                <div class="form-group">
+                <label for="startName">【　積み地　】</label>
+                <!-- <input type="text" id="startname" name="startname" required> -->
+                <p><span id="startNameValue"></span></p>
+                </div>
+                <div class="form-group">
+                <label for="start">【　積み地住所　】</label>
+                <!-- <input type="text" id="startInput" name="start" required> -->
+                <p><span id="startValue"></span></p>
+                </div>
+                <div class="form-group">
+                <label for="endName">【　降し地　】</label>
+                <!-- <input type="text" id="endname" name="endname" required> -->
+                <p><span id="endNameValue"></span></p>
+                </div>
+                <div class="form-group">
+                <label for="destination">【　降し地住所　】</label>
+                <!-- <input type="text" id="endInput" name="destination" required> -->
+                <p><span id="destinationValue"></span></p>
+                </div>
+                <div class="form-group">
+                <label for="item">【　品名　】</label>
+                <!-- <input type="text" id="item" name="item" required> -->
+                <p><span id="itemValue"></span></p>
+                </div>
+                <div class="form-group">
+                <label for="note">【　備考　】</label>
+                <!-- <textarea id="note" name="note"></textarea> -->
+                <p><span id="noteValue"></span></p>
+                </div>
+                <div class="form-actions">
+                    <input id="calculateButton" type="button" value="ルート案内">
+                </div>
+                
+            </form>
+        
+        <!-- <div id="output" ></div>
+        <form id="searchForm">
+            <input type="text" id="searchInput" placeholder="検索キーワード">
+            <button type="submit">検索</button>
+        </form> -->
+        </div>
+
+
+    </div>
+
+        <!-- MapArea コンテナにして経路と案内を横並びにする-->
+        <div class="container">
+        <div id="myMap"></div>
+        <div id="directionsItinerary"></div>
+        <!-- /MapArea -->
+
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <!-- ファイヤーベースを使ってデータを保存する -->
+        <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.13.0/firebase-app.js";
+        import {getDatabase,ref,push,set,onChildAdded,remove,onChildRemoved,} 
+        from "https://www.gstatic.com/firebasejs/9.13.0/firebase-database.js";
+        
+        const firebaseConfig = {
+
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const dbRef = ref(db, "chat");
+        
+        document.getElementById("calculateButton").addEventListener("click", function () {
+            const date = document.getElementById("date").value;
+            const name = document.getElementById("name").value;
+            const code = document.getElementById("code").value;
+            const code2 = document.getElementById("code2").value;
+            const startname = document.getElementById("startName").value;
+            const start = document.getElementById("startInput").value;
+            const endname = document.getElementById("endName").value;
+            const destination = document.getElementById("endInput").value;
+            const item = document.getElementById("item").value;
+            const note = document.getElementById("note").value;  
+            const driver = document.getElementById("driver").value;
+        
+            const msg = {
+            date: date,
+            name: name,
+            code: code,
+            code2: code2,
+            startname: startname,
+            start: start,
+            endname: endname,
+            destination: destination,
+            item: item,
+            note: note,
+            driver: driver,
+        };
+        
+            const newPostRef = push(dbRef);
+            set(newPostRef, msg);
+        
+            alert("登録");
+            clearData();
+        });
+        
+        onChildAdded(dbRef, function (data) {
+            const msg = data.val();
+            // 各フォーム欄に追記される
+            const dateValue = document.getElementById("dateValue");
+            const nameValue = document.getElementById("nameValue");
+            const codeValue = document.getElementById("codeValue");
+            const code2Value = document.getElementById("code2Value");
+            const startNameValue = document.getElementById("startNameValue");
+            const startValue = document.getElementById("startValue");
+            const endNameValue = document.getElementById("endNameValue");
+            const destinationValue = document.getElementById("destinationValue");
+            const itemValue = document.getElementById("itemValue");
+            const noteValue = document.getElementById("noteValue");
+            const driverValue = document.getElementById("driverValue");
+
+
+            // データを表示する
+            dateValue.textContent = msg.date;
+            nameValue.textContent = msg.name;
+            codeValue.textContent = msg.code;
+            code2Value.textContent = msg.code2;
+            startNameValue.textContent = msg.startname;
+            startValue.textContent = msg.start;
+            endNameValue.textContent = msg.endname;
+            destinationValue.textContent = msg.destination;
+            itemValue.textContent = msg.item;
+            noteValue.textContent = msg.note;
+            driverValue.textContent = msg.driver;
+        
+            const h = `
+            <div class="message" data-message-id="${data.key}">
+                <div class="dateshow">${msg.date}</div>
+                <div class="sender">荷主名：${msg.name}</div>
+                <div class="show">
+                    <div class="content">担当部署／担当：${msg.code}　様</div>
+                    <div class="Tell">積み地：${msg.start}</div>
+                    <div class="BoxTo">降し地：${msg.destination}</div>
+                    <div class="internal">品物名：${msg.item}</div>
+                    <div class="internal">備考：${msg.note}</div>
+                </div>
+            </div>
+            <br>
+        `;
+        
+            document.getElementById("output").insertAdjacentHTML("beforeend", h);
+            document.getElementById("output").style.display = "block";
+        
+            document.querySelectorAll(".message").forEach(function (message) {
+            message.addEventListener("dblclick", function () {
+            const messageId = message.dataset.messageId;
+            markAsCompleted(messageId);
+            });
+        });
+        });
+            // 一時消去　deleボタンで画面から消去。
+
+            document.getElementById("dele").addEventListener("click", function () {
+            {
+            document.getElementById("output").innerHTML = "";
+            document.getElementById("output").style.display = "none";
+            }
+        });
+
+        // 検索フォームの送信イベントを処理
+            document.getElementById("searchForm").addEventListener("submit", function (e) {
+            e.preventDefault(); // フォームのデフォルトの送信動作をキャンセル
+
+            const searchKeyword = document.getElementById("searchInput").value;
+
+         // Firestoreでの検索クエリの実行
+            const query = ref(db, "chat");
+            const chatRef = query.orderByChild("data").equalTo(searchKeyword)
+            get(child(chatRef)).then((snapshot) => {
+         // 検索結果を処理するコード
+            if (snapshot.exists()) {
+            console.log(snapshot.val());
+            } else {
+            console.log("該当するデータはありません。");
+            }
+            }).catch((error) => {
+            console.error("検索エラー:", error);
+            });
+            });
+
+
+            // 全消去 データベースからも削除
+        document.getElementById("clear").addEventListener("click", function () {
+        if (confirm("本当に削除しますか？")) {
+            remove(dbRef);
+            document.getElementById("output").style.display = "none";
+            location.reload();
+        }
+        });
+        
+        document.getElementById("remove").addEventListener("click", function () {
+        clearData();
+        });
+        
+        function clearData() {
+        document.getElementById("date").value = "";
+        document.getElementById("name").value = "";
+        document.getElementById("code").value = "";
+        document.getElementById("start").value = "";
+        document.getElementById("destination").value = "";
+        document.getElementById("item").value = "";
+        document.getElementById("note").value = "";
+        }
+                
+        </script>
+
+
+        
+        <!-- ここから経路探索地図        -->
+        
+        <script src='https://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=' async defer></script>
+        <script src="js/BmapQuery.js"></script>
+        <script type='text/javascript'>
+        
+
+            var map;
+            var directionsManager;
+    
+            function GetMap()
+            {
+                map = new Microsoft.Maps.Map('#myMap', {});
+    
+                // ディレクションモジュールをロード
+                Microsoft.Maps.loadModule('Microsoft.Maps.Directions', function () {
+                // 経路案内を作成
+                directionsManager = new Microsoft.Maps.Directions.DirectionsManager(map);
+
+                // 行程のセット
+                directionsManager.setRenderOptions({ itineraryContainer: document.getElementById('directionsItinerary') });
+
+                // 承認、距離を計算
+                document.getElementById('route').addEventListener('click', calculateDirections);
+            });
+        }
+
+        function calculateDirections() {
+            var start = document.getElementById("startValue").value;
+            var end = document.getElementById("destinationValue").value;
+
+            // 通過地点を加える.
+            directionsManager.clearAll();
+            directionsManager.addWaypoint(new Microsoft.Maps.Directions.Waypoint({ address: start }));
+            directionsManager.addWaypoint(new Microsoft.Maps.Directions.Waypoint({ address: end }));
+
+            // 距離の計算.
+            directionsManager.calculateDirections();
+        }
+    </script>
+        </script>
+        <script src='https://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=' async defer></script>
+        
+    </head>
+
+
+
+    </main>
+
+    <footer id="footer ">
+        <div class="footer ">
+            <p>copyrights since from 1976 Tutty's Academy SAITAMA All RIghts Reserved.</p>
+        </div>
+    </footer>
+
+
+
+
+
+</body>
+
+</html>
